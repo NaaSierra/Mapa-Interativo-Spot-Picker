@@ -1,6 +1,6 @@
 // Inicialização do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDVLx65ITELcKaavvQYyKO30I_waRTddb0",
@@ -1022,3 +1022,27 @@ if (btnEditBgMap) btnEditBgMap.addEventListener('click', enableBgEditMode);
 
 const btnEditAreas = document.getElementById('btnEditAreas');
 if (btnEditAreas) btnEditAreas.addEventListener('click', manageAreas);
+
+// --- MIGRAÇÃO DE DADOS PARA O FIREBASE ---
+
+// Função para subir os dados iniciais (rodaremos apenas uma vez)
+window.uploadInitialDataToFirebase = async function() {
+    try {
+        console.log("Iniciando upload de dados para o Firebase...");
+        
+        // Percorre cada evento dentro daquele EVENTS_DB falso que criamos
+        for (const evt of EVENTS_DB) {
+            // Cria um documento no Firebase dentro da coleção 'events' usando o ID do evento
+            const eventRef = doc(window.db, "events", evt.id);
+            
+            // Salva os dados no banco
+            await setDoc(eventRef, evt);
+            console.log(`Evento ${evt.name} salvo com sucesso!`);
+        }
+        
+        alert("Dados migrados para o Firebase com sucesso! Olhe lá no console do Firebase.");
+    } catch (error) {
+        console.error("Erro ao salvar dados: ", error);
+        alert("Ops, deu um erro. Veja o console do navegador.");
+    }
+};
