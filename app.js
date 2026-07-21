@@ -23,8 +23,8 @@ const auth = getAuth(app);
 window.auth = auth;
 // Dados Globais do Sistema e Configuração
 const USER_DB = {
-    'admin@spotpicker.com': { role: 'ADMIN', name: 'Admin Supremo' },
-    'producao@spotpicker.com': { role: 'MANAGER', name: 'Gerente Produção', events: ['evt1', 'evt2'] },
+    'nathalia@gamescom.com.br': { role: 'ADMIN', name: 'Admin Supremo' },
+    'ana@gamescom.com.br': { role: 'MANAGER', name: 'Gerente Produção', events: ['evt1', 'evt2'] },
     'vendas@spotpicker.com': { role: 'USER', name: 'Ricardo Viana', events: ['evt1'] },
     'diretoria@spotpicker.com': { role: 'USER', name: 'Camila Fonseca', events: ['evt1', 'evt2'] },
     'teste@gmail.com': { role: 'ADMIN', name: 'Testador' }
