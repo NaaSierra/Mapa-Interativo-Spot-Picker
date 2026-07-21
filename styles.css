@@ -935,35 +935,52 @@ svg {
     border-color: var(--occupied);
     background: #fffafa;
 }
-/* Novos Controles e Inputs do Passo 7 */
-.map-controls-bar {
+/* --- Cabeçalho Unificado do Mapa --- */
+.unified-map-header {
     display: flex;
-    gap: 20px;
-    padding: 8px 24px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
+    justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    color: var(--text);
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
     flex-shrink: 0;
 }
 
-.map-controls-bar label {
+/* Áreas na esquerda */
+.unified-map-header .area-tabs {
+    flex: 1;
+    border-bottom: none; /* Remove a borda antiga */
+    padding: 0;
+    height: auto;
+}
+
+/* Opacidade no centro */
+.unified-map-header .header-center {
+    flex: 1;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
     font-family: var(--font-sans);
     font-weight: 500;
 }
 
-.map-controls-bar input[type="number"] {
-    width: 60px;
-    padding: 4px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--surface);
-    color: var(--text);
-    font-family: var(--font-mono);
+/* Controles na direita */
+.unified-map-header .header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Estilo para o filtro Meus Estandes ativo */
+.filter-btn.active.my-booths-filter {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .edit-input {

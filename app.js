@@ -50,6 +50,7 @@ let currentEvent = null;
 
 let currentStatusFilter = 'all';
 let currentAreaFilter = 'all';
+let filterMyBooths = false;
 let currentSearch = '';
 let selectedBoothId = null;
 let transform = { x: 0, y: 0, scale: 1 };
@@ -385,6 +386,7 @@ function renderMap() {
             el.style.opacity = '1';
         } else {
             el.style.opacity = '0.2';
+            if (filterMyBooths && booth.executive !== currentUser.name && booth.executive !== currentUser.email) opacity = 0.2;
         }
     });
 
@@ -460,6 +462,7 @@ function renderList() {
     const filtered = currentEvent.booths.filter(b => {
         if (currentStatusFilter !== 'all' && b.status !== currentStatusFilter) return false;
         if (currentAreaFilter !== 'all' && b.area !== currentAreaFilter) return false;
+        if (filterMyBooths && b.executive !== currentUser.name && b.executive !== currentUser.email) return false;
         
         if (currentSearch) {
             const term = currentSearch.toLowerCase();
@@ -615,11 +618,22 @@ function setupEvents() {
         renderMap();
     });
 
-    document.querySelectorAll('.sidebar .filter-btn').forEach(btn => {
+document.querySelectorAll('.sidebar .filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.sidebar .filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            currentStatusFilter = e.target.getAttribute('data-filter');
+            
+            const filterVal = e.target.getAttribute('data-filter');
+            
+            // Lógica para diferenciar se é filtro de status ou o filtro "Meus Estandes"
+            if (filterVal === 'my_booths') {
+                filterMyBooths = true;
+                currentStatusFilter = 'all'; // Volta os status para 'all' para ver tudo que é seu
+            } else {
+                filterMyBooths = false;
+                currentStatusFilter = filterVal;
+            }
+            
             selectedBoothId = null;
             document.getElementById('boothDetails').classList.add('hidden');
             renderMap();
@@ -1118,10 +1132,14 @@ function updateUIPermissions() {
     const canEditStructure = currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER';
     const btnMap = document.getElementById('btnEditBgMap');
     const btnAreas = document.getElementById('btnEditAreas');
+    const btnForm = document.getElementById('btnDrawForm'); // Nosso botão novo
     
     if(btnMap && btnAreas) {
         btnMap.classList.toggle('hidden', !canEditStructure);
         btnAreas.classList.toggle('hidden', !canEditStructure);
+    }
+    if(btnForm) {
+        btnForm.classList.toggle('hidden', !canEditStructure); // Aplica a regra aqui
     }
 }
 

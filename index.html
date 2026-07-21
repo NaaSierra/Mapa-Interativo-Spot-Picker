@@ -77,11 +77,12 @@
                         <input type="text" id="searchInput" placeholder="Buscar estande, cliente, categoria...">
                     </div>
                     <div class="filters">
-                        <button class="filter-btn active" data-filter="all">Todos</button>
-                        <button class="filter-btn occupied-filter" data-filter="occupied">Ocup.</button>
-                        <button class="filter-btn reserved-filter" data-filter="reserved">Resrv.</button>
-                        <button class="filter-btn available-filter" data-filter="available">Disp.</button>
-                    </div>
+    <button class="filter-btn active" data-filter="all">Todos</button>
+    <button class="filter-btn occupied-filter" data-filter="occupied">Ocup.</button>
+    <button class="filter-btn reserved-filter" data-filter="reserved">Resrv.</button>
+    <button class="filter-btn available-filter" data-filter="available">Disp.</button>
+    <button class="filter-btn my-booths-filter" data-filter="my_booths">Meus</button> 
+</div>
                 </div>
                 <div class="booth-list" id="boothList">
                     <!-- Lista será preenchida via JS -->
@@ -91,19 +92,24 @@
             <!-- Área Principal do Mapa -->
             <main class="map-area">
                 <!-- Abas de Áreas -->
-                <div class="area-tabs" id="areaTabs">
-                    <!-- Preenchido via JS -->
-                </div>
-                <!-- Controles Rápidos do Mapa (Zoom e Opacidade) -->
-<!-- Controles Rápidos do Mapa -->
-<div class="map-controls-bar" id="mapControlsBar">
-    <button id="btnEditBgMap" class="action-btn secondary hidden">Editar Mapa de Referência</button>
-    <button id="btnEditAreas" class="action-btn secondary hidden">Editar Áreas</button>
+                <!-- Cabeçalho Unificado do Mapa -->
+<div class="unified-map-header">
+    <!-- Esquerda: Áreas -->
+    <div class="area-tabs" id="areaTabs">
+        <!-- Preenchido via JS -->
+    </div>
     
-    <label style="margin-left: auto;">
-        Opacidade da Planta:
-        <input type="range" id="bgOpacityInput" min="0" max="100" value="100">
-    </label>
+    <!-- Centro: Opacidade -->
+    <div class="header-center">
+        <label>Opacidade da Planta: <input type="range" id="bgOpacityInput" min="0" max="100" value="100"></label>
+    </div>
+    
+    <!-- Direita: Controles -->
+    <div class="header-right" id="mapControlsBar">
+        <button id="btnEditBgMap" class="action-btn secondary hidden">Editar Mapa de Referência</button>
+        <button id="btnEditAreas" class="action-btn secondary hidden">Editar Áreas</button>
+        <button id="btnDrawForm" class="action-btn secondary hidden">+ Adicionar Forma</button>
+    </div>
 </div>
 
 <!-- Banner Modo de Edição -->
