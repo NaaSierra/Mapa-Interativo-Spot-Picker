@@ -32,56 +32,7 @@ const THEMES = {
     'Dark': { bg: '#08090d', surface: '#0e1117', surface2: '#141923', border: '#1e2a38', text: '#c8d5e2', muted: '#4e6070', accent: '#e8a020', occupied: '#e04848', available: '#24c864', reserved: '#3878f0', maintenance: '#9850e0' }
 };
 
-let EVENTS_DB = [
-    {
-        id: 'evt1',
-        name: 'ExpoTech 2026',
-        theme: JSON.parse(JSON.stringify(THEMES['Light'])),
-        font: 'DM Sans',
-        bgImage: { url: '', x: 0, y: 0, scale: 1, rotation: 0 },
-        areas: [
-            { id: 'tech', name: 'Tecnologia', x: 20, y: 20, w: 420, h: 240, accent: '#3878f0', dim: '#0e2050' },
-            { id: 'design', name: 'Design & Inovação', x: 460, y: 20, w: 420, h: 240, accent: '#9850e0', dim: '#2a0e4a' },
-            { id: 'food', name: 'Gastronomia', x: 20, y: 280, w: 200, h: 240, accent: '#24c864', dim: '#0e3820' },
-            { id: 'conf', name: 'Conferências', x: 240, y: 280, w: 640, h: 240, accent: '#e8a020', dim: '#7a4e08' }
-        ],
-        booths: [
-            { id: 'A01', label: 'A-01', exhibitor: 'Totvs', area: 'tech', status: 'occupied', category: 'ERP & Software', x: 30, y: 65, w: 55, h: 72, sqm: 9, executive: 'Ricardo Viana' },
-            { id: 'A02', label: 'A-02', exhibitor: 'Dell Brasil', area: 'tech', status: 'occupied', category: 'Hardware', x: 95, y: 65, w: 55, h: 72, sqm: 9, executive: 'Camila Fonseca' },
-            { id: 'A03', label: 'A-03', exhibitor: 'Lenovo BR', area: 'tech', status: 'occupied', category: 'Hardware', x: 162, y: 58, w: 55, h: 80, sqm: 9, executive: 'Bruno Almeida', rotation: -8 },
-            { id: 'A04', label: 'A-04', exhibitor: 'AWS Brasil', area: 'tech', status: 'reserved', category: 'Cloud', x: 232, y: 65, w: 55, h: 72, sqm: 9 },
-            { id: 'A05', label: 'A-05', exhibitor: '', area: 'tech', status: 'available', category: '', x: 298, y: 65, w: 55, h: 72, sqm: 9 },
-            { id: 'A08', label: 'A-08', exhibitor: 'Oracle BR', area: 'tech', status: 'occupied', category: 'Database', x: 97, y: 155, w: 68, h: 80, sqm: 12, executive: 'Luiza Carvalho', rotation: 10 },
-            { id: 'A10', label: 'A-10', exhibitor: '', area: 'tech', status: 'maintenance', category: '', x: 243, y: 158, w: 55, h: 72, sqm: 9 },
-            { id: 'A11', label: 'A-11', exhibitor: '', area: 'tech', status: 'available', category: '', x: 307, y: 158, w: 55, h: 72, sqm: 9 },
-            { id: 'B01', label: 'B-01', exhibitor: 'Adobe Brasil', area: 'design', status: 'occupied', category: 'Creative Software', x: 470, y: 65, w: 70, h: 75, sqm: 10, executive: 'Fernanda Costa' },
-            { id: 'B04', label: 'B-04', exhibitor: '', area: 'design', status: 'available', category: '', x: 718, y: 65, w: 70, h: 75, sqm: 10 },
-            { id: 'B05', label: 'B-05', exhibitor: 'XP Inc.', area: 'design', status: 'reserved', category: 'Financial UX', x: 800, y: 65, w: 70, h: 75, sqm: 10 },
-            { id: 'C01', label: 'C-01', exhibitor: 'Ambev', area: 'food', status: 'occupied', category: 'Bebidas', x: 32, y: 298, w: 84, h: 68, sqm: 8, executive: 'Marcos Pinto', rotation: 6 },
-            { id: 'C03', label: 'C-03', exhibitor: '', area: 'food', status: 'available', category: '', x: 32, y: 378, w: 84, h: 68, sqm: 8 },
-            { id: 'D01', label: 'D-01', exhibitor: 'Embraer', area: 'conf', status: 'occupied', category: 'Keynote Sponsor', x: 256, y: 298, w: 136, h: 98, sqm: 18, executive: 'Cláudio Menezes', rotation: -5 },
-            { id: 'D07', label: 'D-07', exhibitor: '', area: 'conf', status: 'available', category: 'Diamond Sponsor', x: 552, y: 408, w: 136, h: 98, sqm: 18 }
-        ],
-        history: [
-            { id: 'h1', boothId: 'D01', boothLabel: 'D-01', action: 'Contrato assinado', user: 'Ana Lima', timestamp: '21/07/2026 14:32', detail: 'Embraer — upgrade Keynote' },
-            { id: 'h2', boothId: 'A04', boothLabel: 'A-04', action: 'Reserva confirmada', user: 'Carlos Mota', timestamp: '21/07/2026 13:15', detail: 'AWS Brasil — pagamento aprovado' }
-        ]
-    },
-    {
-        id: 'evt2',
-        name: 'Future Agro 2026',
-        theme: JSON.parse(JSON.stringify(THEMES['Dark'])),
-        font: 'Outfit',
-        bgImage: { url: '', x: 0, y: 0, scale: 1, rotation: 0 },
-        areas: [
-            { id: 'agro', name: 'Agrotech', x: 50, y: 50, w: 300, h: 300, accent: '#24c864', dim: '#0e3820' }
-        ],
-        booths: [
-            { id: 'AG01', label: 'AG-01', exhibitor: 'John Deere', area: 'agro', status: 'occupied', category: 'Máquinas', x: 60, y: 60, w: 100, h: 100, sqm: 25, executive: 'Bruno Almeida' }
-        ],
-        history: []
-    }
-];
+let EVENTS_DB = [];
 
 const LABELS = {
     occupied: 'Ocupado',
@@ -103,13 +54,71 @@ let isBgEditMode = false;
 
 const mapViewport = document.querySelector('.map-viewport');
 
+let isEventsLoaded = false;
+
+function loadEventsFromFirebase() {
+    onSnapshot(collection(window.db, "events"), (snapshot) => {
+        EVENTS_DB = [];
+        snapshot.forEach((doc) => {
+            EVENTS_DB.push({ id: doc.id, ...doc.data() });
+        });
+        
+        if (!isEventsLoaded) {
+            isEventsLoaded = true;
+            const loginBtn = document.getElementById('btnGoogleLogin');
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Entrar com Google";
+            }
+        }
+
+        if (currentUser && currentEvent) {
+            currentEvent = EVENTS_DB.find(e => e.id === currentEvent.id);
+            if (currentEvent) {
+                renderTopBar();
+                renderStats();
+                renderAreaTabs();
+                renderMapBg();
+                renderAreas();
+                renderMap();
+                renderList();
+                renderHistory();
+            }
+        }
+    });
+}
+
+async function saveEventToFirebase(evt) {
+    if(!evt) return;
+    try {
+        await setDoc(doc(window.db, "events", evt.id), evt);
+    } catch(err) {
+        console.error("Erro ao salvar no Firestore:", err);
+    }
+}
+
+let globalSaveTimeout = null;
+function debouncedSaveEventToFirebase(evt) {
+    if(!evt) return;
+    clearTimeout(globalSaveTimeout);
+    globalSaveTimeout = setTimeout(() => saveEventToFirebase(evt), 600);
+}
+
 // Inicialização Auth Flow
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('btnGoogleLogin').addEventListener('click', simulateLogin);
+    const loginBtn = document.getElementById('btnGoogleLogin');
+    if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.innerText = "Conectando...";
+        loginBtn.addEventListener('click', simulateLogin);
+    }
+    
     document.getElementById('btnTryAgain').addEventListener('click', () => {
         document.getElementById('deniedScreen').classList.add('hidden');
         document.getElementById('loginScreen').classList.remove('hidden');
     });
+
+    loadEventsFromFirebase();
 });
 
 async function simulateLogin() {
@@ -149,7 +158,7 @@ function checkAccess(email, authorizedList) {
         document.getElementById('deniedScreen').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
         
-        initializeApp();
+        initWebApp();
     } else {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('deniedScreen').classList.remove('hidden');
@@ -157,7 +166,7 @@ function checkAccess(email, authorizedList) {
     }
 }
 
-function initializeApp() {
+function initWebApp() {
     renderTopBar();
     updateUIPermissions();
     renderStats();
@@ -171,6 +180,11 @@ function initializeApp() {
     setupPanZoom();
     setupDragAndDrop();
     applyEventThemeAndFont();
+    
+    // Chamada automática temporária para upload dos dados (removida)
+    // if (window.uploadInitialDataToFirebase) {
+    //     window.uploadInitialDataToFirebase();
+    // }
 }
 
 function applyEventThemeAndFont() {
@@ -260,6 +274,7 @@ window.createNewEvent = function() {
             areas: [], booths: [], history: [] 
         };
         EVENTS_DB.push(newEvt);
+        saveEventToFirebase(newEvt);
         switchEvent(newEvt.id);
     }
 }
@@ -398,6 +413,7 @@ function renderMap() {
                 const delta = e.deltaY > 0 ? 5 : -5;
                 booth.rotation = (booth.rotation || 0) + delta;
                 renderMap();
+                debouncedSaveEventToFirebase(currentEvent);
             }
         });
 
@@ -725,6 +741,7 @@ window.applyPresetTheme = function(themeName) {
         openConfigModal(); // Re-render para atualizar os color pickers
         renderMap();
         renderList();
+        saveEventToFirebase(currentEvent);
     }
 }
 
@@ -737,6 +754,7 @@ window.updateThemeVar = function(varName, hexValue) {
         renderHistory();
         if(selectedBoothId) showDetails(selectedBoothId);
     }
+    debouncedSaveEventToFirebase(currentEvent);
 }
 
 window.simulateFontUpload = function() {
@@ -747,12 +765,14 @@ window.changeFont = function(fontName) {
     if(currentUser.role !== 'ADMIN') return;
     currentEvent.font = fontName;
     applyEventThemeAndFont();
+    saveEventToFirebase(currentEvent);
 }
 
 window.updateBgImage = function() {
     const url = document.getElementById('bgImgUrl').value;
     currentEvent.bgImage.url = url;
     renderMapBg();
+    saveEventToFirebase(currentEvent);
 }
 
 window.enableBgEditMode = function() {
@@ -771,6 +791,7 @@ window.manageAreas = function() {
         currentEvent.areas.push({ id: id, name: name, x: 100, y: 100, w: 200, h: 200, accent: '#d08010', dim: '#444' });
         renderAreaTabs();
         renderAreas();
+        saveEventToFirebase(currentEvent);
         alert('Área criada com sucesso!');
     }
 }
@@ -790,6 +811,7 @@ function logHistory(boothId, label, action, detail) {
         detail: detail
     });
     renderHistory();
+    saveEventToFirebase(currentEvent);
 }
 
 function setupDragAndDrop() {
@@ -857,11 +879,19 @@ function setupDragAndDrop() {
     });
 
     window.addEventListener('mouseup', () => {
+        let changed = false;
         if (draggedBooth) {
             setTimeout(() => { window.isDraggingBooth = false; }, 50);
             draggedBooth = null;
+            changed = true;
         }
-        isDraggingBg = false;
+        if (isDraggingBg) {
+            isDraggingBg = false;
+            changed = true;
+        }
+        if (changed && currentEvent) {
+            saveEventToFirebase(currentEvent);
+        }
     });
 
     document.getElementById('mapContainer').addEventListener('wheel', (e) => {
@@ -875,6 +905,7 @@ function setupDragAndDrop() {
                 currentEvent.bgImage.scale *= delta;
             }
             renderMapBg();
+            debouncedSaveEventToFirebase(currentEvent);
         }
     });
 }
@@ -1003,7 +1034,6 @@ inputsToAutoSave.forEach(id => {
             renderList();
             renderStats();
             
-            // Atualiza a badge no topo do painel se o status mudar
             if(id === 'editStatus') {
                 const badge = document.getElementById('detailStatusBadge');
                 badge.innerText = LABELS[booth.status];
@@ -1012,6 +1042,8 @@ inputsToAutoSave.forEach(id => {
                 badge.style.backgroundColor = `${color}15`;
                 badge.style.borderColor = `${color}44`;
             }
+            
+            debouncedSaveEventToFirebase(currentEvent);
         });
     }
 });
@@ -1026,8 +1058,8 @@ if (btnEditAreas) btnEditAreas.addEventListener('click', manageAreas);
 // --- MIGRAÇÃO DE DADOS PARA O FIREBASE ---
 
 // Função para subir os dados iniciais (rodaremos apenas uma vez)
-window.uploadInitialDataToFirebase = async function() {
-    try {
+// window.uploadInitialDataToFirebase = async function() {
+//     try {
         console.log("Iniciando upload de dados para o Firebase...");
         
         // Percorre cada evento dentro daquele EVENTS_DB falso que criamos
@@ -1040,9 +1072,9 @@ window.uploadInitialDataToFirebase = async function() {
             console.log(`Evento ${evt.name} salvo com sucesso!`);
         }
         
-        alert("Dados migrados para o Firebase com sucesso! Olhe lá no console do Firebase.");
+    console.log('Dados enviados ao Firestore!');
     } catch (error) {
         console.error("Erro ao salvar dados: ", error);
-        alert("Ops, deu um erro. Veja o console do navegador.");
-    }
-};
+//         alert("Ops, deu um erro. Veja o console do navegador.");
+//     }
+// };
