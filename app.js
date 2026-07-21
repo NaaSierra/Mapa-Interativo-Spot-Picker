@@ -76,6 +76,12 @@ function loadEventsFromFirebase() {
                 loginBtn.disabled = false;
                 loginBtn.innerText = "Entrar com Google";
             }
+            
+            // CORREÇÃO DA CORRIDA: Se o Auth já liberou o usuário antes do banco carregar, 
+            // chama o acesso agora que os eventos estão prontos!
+            if (currentUser) {
+                checkAccess(currentUser.email, Object.keys(USER_DB));
+            }
         }
 
         if (currentUser && currentEvent) {
@@ -89,6 +95,9 @@ function loadEventsFromFirebase() {
                 renderMap();
                 renderList();
                 renderHistory();
+            } else if (currentUser.role === 'ADMIN' && EVENTS_DB.length > 0) {
+                // Se o evento ativo foi deletado, muda para o primeiro da lista
+                switchEvent(EVENTS_DB[0].id);
             }
         }
     });
@@ -150,14 +159,19 @@ async function startGoogleLogin() {
 function checkAccess(email, authorizedList) {
     if (authorizedList.includes(email) && USER_DB[email]) {
         currentUser = USER_DB[email];
+        currentUser.email = email; // Salva o e-mail no objeto para referência
+
+        // CORREÇÃO DA CORRIDA: Se o banco de eventos não carregou, aborte. 
+        // O loadEventsFromFirebase vai chamar essa função de novo depois.
+        if (!isEventsLoaded) return;
         
         if (currentUser.role === 'ADMIN') {
-            currentEvent = EVENTS_DB[0];
+            currentEvent = EVENTS_DB[0]; // Pega o primeiro evento (se existir)
         } else {
             currentEvent = EVENTS_DB.find(e => currentUser.events.includes(e.id));
         }
 
-        if(!currentEvent) {
+        if(!currentEvent && currentUser.role !== 'ADMIN') {
             alert('Você não tem eventos atribuídos.');
             return;
         }
@@ -166,6 +180,17 @@ function checkAccess(email, authorizedList) {
         document.getElementById('deniedScreen').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
         
+        // CORREÇÃO DO BANCO VAZIO: Se o Admin deletar todos os eventos, cria um "fantasma" 
+        // temporário para a tela abrir e ele conseguir clicar no menu e criar um novo
+        if (!currentEvent && currentUser.role === 'ADMIN') {
+            currentEvent = {
+                id: 'temp_vazio', name: 'Nenhum Evento (Crie um novo)',
+                theme: JSON.parse(JSON.stringify(THEMES['Light'])),
+                font: 'DM Sans', bgImage: { url: '', x: 0, y: 0, scale: 1, rotation: 0 },
+                areas: [], booths: [], history: []
+            };
+        }
+
         initWebApp();
     } else {
         document.getElementById('loginScreen').classList.add('hidden');
