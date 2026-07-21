@@ -1,3 +1,23 @@
+// Inicialização do Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDVLx65ITELcKaavvQYyKO30I_waRTddb0",
+  authDomain: "mapa-interativo---spot-picker.firebaseapp.com",
+  projectId: "mapa-interativo---spot-picker",
+  storageBucket: "mapa-interativo---spot-picker.firebasestorage.app",
+  messagingSenderId: "640340826901",
+  appId: "1:640340826901:web:331f5e3f6086be451d671c",
+  measurementId: "G-6FMBGXEJBC"
+};
+
+// Conecta o app e o banco de dados
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Torna o db global para podermos acessar em outras partes do código
+window.db = db;
 // Dados Globais do Sistema e Configuração
 const USER_DB = {
     'admin@spotpicker.com': { role: 'ADMIN', name: 'Admin Supremo' },
