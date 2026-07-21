@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo - Spot Picker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Inter:wght@400;500;600&family=Roboto:wght@400;500;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="light-theme">
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="auth-screen">
+        <div class="auth-box">
+            <h1>SpotPicker</h1>
+            <p>Faça login para acessar o mapa interativo.</p>
+            <button id="btnGoogleLogin" class="google-btn">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Entrar com Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela de Acesso Negado -->
+    <div id="deniedScreen" class="auth-screen hidden">
+        <div class="auth-box denied-box">
+            <h1 style="color: var(--occupied);">Acesso Negado</h1>
+            <p>E-mail não autorizado.</p>
+            <p id="deniedEmail" style="font-weight: bold; margin-top: 10px;"></p>
+            <button id="btnTryAgain" class="action-btn change-status" style="margin-top: 20px;">Tentar Novamente</button>
+        </div>
+    </div>
+
+    <!-- Aplicação Principal (Oculta até o login) -->
+    <div class="app-wrapper hidden" id="mainApp">
+        <!-- Top Navigation -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="brand">SpotPicker</div>
+                <div class="event-selector" id="eventSelectorDropdown">
+                    <span id="currentEventLabel">ExpoTech 2026</span>
+                    <span class="dropdown-icon">▼</span>
+                    <!-- Dropdown options injected via JS -->
+                </div>
+            </div>
+            
+            <div class="topbar-center">
+                <div class="topbar-stats" id="topbarStats">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <button class="topbar-btn" id="btnToggleList">Lista</button>
+                <button class="topbar-btn" id="btnToggleHistory">Histórico</button>
+                <button class="topbar-btn" id="btnOpenConfig">Configuração</button>
+            </div>
+        </header>
+
+        <div class="app-main">
+            <!-- Sidebar Esquerda - Lista de Estandes -->
+            <aside class="sidebar" id="leftSidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-top">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <h2>Estandes</h2>
+                            <span class="booth-count" id="boothCountTotal">0</span>
+                        </div>
+                        <button class="close-sidebar-btn" id="btnCloseList">×</button>
+                    </div>
+                    <div class="search-box">
+                        <span class="search-icon">⌕</span>
+                        <input type="text" id="searchInput" placeholder="Buscar estande, cliente, categoria...">
+                    </div>
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">Todos</button>
+                        <button class="filter-btn occupied-filter" data-filter="occupied">Ocup.</button>
+                        <button class="filter-btn reserved-filter" data-filter="reserved">Resrv.</button>
+                        <button class="filter-btn available-filter" data-filter="available">Disp.</button>
+                    </div>
+                </div>
+                <div class="booth-list" id="boothList">
+                    <!-- Lista será preenchida via JS -->
+                </div>
+            </aside>
+
+            <!-- Área Principal do Mapa -->
+            <main class="map-area">
+                <!-- Abas de Áreas -->
+                <div class="area-tabs" id="areaTabs">
+                    <!-- Preenchido via JS -->
+                </div>
+                <!-- Controles Rápidos do Mapa (Zoom e Opacidade) -->
+<!-- Controles Rápidos do Mapa -->
+<div class="map-controls-bar" id="mapControlsBar">
+    <button id="btnEditBgMap" class="action-btn secondary hidden">Editar Mapa de Referência</button>
+    <button id="btnEditAreas" class="action-btn secondary hidden">Editar Áreas</button>
+    
+    <label style="margin-left: auto;">
+        Opacidade da Planta:
+        <input type="range" id="bgOpacityInput" min="0" max="100" value="100">
+    </label>
+</div>
+
+                <!-- Banner Modo de Edição -->
+                <div id="bgEditModeBanner" class="bg-edit-banner hidden">
+                    <span>MODO EDIÇÃO DE PLANTA ATIVADO</span>
+                    <small>Arraste para mover, Shift+Scroll para rotacionar, Scroll para escalar.</small>
+                    <button id="btnExitBgEdit" class="action-btn change-status" style="padding: 4px 12px; margin-left: auto;">Concluir Edição</button>
+                </div>
+                
+                <div class="map-container" id="mapContainer">
+                    <div class="map-viewport">
+                        <svg id="mapSvg" viewBox="0 0 900 540" preserveAspectRatio="xMidYMid meet">
+                            <!-- Fundo Pontilhado via padrão SVG -->
+                            <defs>
+                                <pattern id="sg" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M20 0L0 0 0 20" fill="none" stroke="var(--border)" stroke-width=".3"/>
+                                </pattern>
+                                <pattern id="lg" width="100" height="100" patternUnits="userSpaceOnUse">
+                                    <rect width="100" height="100" fill="url(#sg)"/>
+                                    <path d="M100 0L0 0 0 100" fill="none" stroke="var(--border)" stroke-width=".7"/>
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#lg)"/>
+
+                            <!-- Imagem de Fundo (Atrás de tudo) -->
+                            <image id="mapBgImage" href="" x="0" y="0" width="1000" height="1000" opacity="1" transform="" style="pointer-events: none;"></image>
+
+                            <!-- Zonas das Áreas -->
+                            <g class="areas" id="areasGroup"></g>
+                            
+                            <!-- Rótulos do Mapa -->
+                            <text x="450" y="152" text-anchor="middle" fill="var(--muted)" font-size="7.5" font-family="JetBrains Mono,monospace" letter-spacing=".1em">CORREDOR CENTRAL</text>
+                            <line x1="80" y1="152" x2="330" y2="152" stroke="var(--border)" stroke-width=".8"/>
+                            <line x1="570" y1="152" x2="820" y2="152" stroke="var(--border)" stroke-width=".8"/>
+                            <text x="130" y="270" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="JetBrains Mono,monospace" letter-spacing=".1em">ACESSO</text>
+
+                            <!-- Estandes -->
+                            <g class="booths" id="boothsGroup"></g>
+                        </svg>
+                    </div>
+                    <!-- Controles de Zoom -->
+                    <div class="zoom-controls">
+                        <button id="zoomIn">+</button>
+                        <button id="zoomOut">−</button>
+                        <button id="zoomReset">⊙</button>
+                    </div>
+                    <!-- Legenda movida pro rodapé -->
+                    <div class="legend-bottom">
+                        <span class="legend-item"><span class="color-dot occupied"></span> Ocupado</span>
+                        <span class="legend-item"><span class="color-dot reserved"></span> Reservado</span>
+                        <span class="legend-item"><span class="color-dot available"></span> Livre</span>
+                        <span class="legend-item"><span class="color-dot maintenance"></span> Manutenção</span>
+                    </div>
+                </div>
+                <!-- Detalhes do Estande (Layout Figma - Bottom Docked) -->
+<div class="booth-details-panel hidden" id="boothDetails">
+    <div class="details-header">
+        <div class="details-title-row">
+            <h2 id="detailLabel">A-01</h2>
+            <span class="status-badge" id="detailStatusBadge">Ocupado</span>
+            <span id="detailAreaBadge" style="font-size: 11px; background: var(--surface2); padding: 4px 10px; border-radius: 4px; color: var(--text);">Tecnologia</span>
+            <button id="btnLockToggle" class="action-btn secondary" style="padding: 2px 6px; font-size: 12px; margin-left: auto;" title="Bloquear Edição">🔓</button>
+            <button class="close-btn" id="closeDetails" style="margin-left: 15px;">×</button>
+        </div>
+    </div>
+    
+    <div class="details-content">
+        <input type="text" id="editExhibitor" class="edit-input" style="font-size: 18px; font-weight: 600; color: var(--accent); border: none; background: transparent; padding: 0;" placeholder="Nome do Cliente (Vago)">
+        
+        <div class="detail-grid">
+            <div class="detail-field">
+                <label>Executivo Responsável</label>
+                <input type="text" id="editExecutive" class="edit-input">
+            </div>
+            <div class="detail-field">
+                <label>Status</label>
+                <select id="editStatus" class="edit-input">
+                    <option value="available">Livre</option>
+                    <option value="occupied">Ocupado</option>
+                    <option value="reserved">Reservado</option>
+                    <option value="maintenance">Manutenção</option>
+                </select>
+            </div>
+            <div class="detail-field" id="adminCoordinatesGrid" style="display: flex; gap: 10px;">
+                <div style="flex: 1;"><label>Pos X</label><input type="number" id="editX" class="edit-input"></div>
+                <div style="flex: 1;"><label>Pos Y</label><input type="number" id="editY" class="edit-input"></div>
+                <div style="flex: 1;"><label>Rotação</label><input type="number" id="editRotation" class="edit-input"></div>
+            </div>
+        </div>
+    </div>
+</div>
+            </main>
+
+            <!-- Sidebar Direita - Histórico -->
+            <aside class="sidebar history-sidebar hidden" id="rightSidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-top">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <h2>Histórico</h2>
+                            <span class="booth-count" id="historyCountTotal">0</span>
+                        </div>
+                        <button class="close-sidebar-btn" id="btnCloseHistory">×</button>
+                    </div>
+                </div>
+                <div class="booth-list history-list" id="historyList">
+                    <!-- Histórico será preenchido via JS -->
+                </div>
+            </aside>
+
+
+    <!-- Modal de Configuração -->
+    <div class="modal-overlay hidden" id="configModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Configurações do Sistema</h2>
+                <button class="close-btn" id="btnCloseConfig">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="config-section">
+                    <h3>Preferências Gerais</h3>
+                    <p>Opções de layout, notificações e comportamentos da planta.</p>
+                    <!-- Exemplo de opções de configuração -->
+                    <label style="display:flex; align-items:center; gap:10px; margin-top:15px; font-size:14px; color:var(--text); cursor:pointer;">
+                        <input type="checkbox" checked> Exibir miniatura do mapa na lista
+                    </label>
+                    <label style="display:flex; align-items:center; gap:10px; margin-top:10px; font-size:14px; color:var(--text); cursor:pointer;">
+                        <input type="checkbox" checked> Ativar alertas do Slack automaticamente
+                    </label>
+                </div>
+                
+                <div class="config-section">
+                    <h3>Gerenciamento</h3>
+                    <div class="actions" style="border:none; padding-top:10px;">
+                        <button class="action-btn secondary">Sincronizar com Monday</button>
+                        <button class="action-btn secondary">Importar via Jotform</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn change-status" id="btnSaveConfig">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

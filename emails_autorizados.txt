@@ -1,0 +1,5 @@
+admin@spotpicker.com
+vendas@spotpicker.com
+producao@spotpicker.com
+diretoria@spotpicker.com
+teste@gmail.com
