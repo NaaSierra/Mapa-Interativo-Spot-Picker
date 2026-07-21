@@ -99,11 +99,6 @@
         <!-- Preenchido via JS -->
     </div>
     
-    <!-- Centro: Opacidade -->
-    <div class="header-center">
-        <label>Opacidade da Planta: <input type="range" id="bgOpacityInput" min="0" max="100" value="100"></label>
-    </div>
-    
     <!-- Direita: Controles -->
     <div class="header-right" id="mapControlsBar">
         <button id="btnEditBgMap" class="action-btn secondary hidden">Editar Mapa de Referência</button>
@@ -153,19 +148,19 @@
                         </svg>
                     </div>
                     <!-- Controles de Zoom -->
-                    <div class="zoom-controls">
-                        <button id="zoomIn">+</button>
-                        <button id="zoomOut">−</button>
-                        <button id="zoomReset">⊙</button>
-                    </div>
-                    <!-- Legenda movida pro rodapé -->
-                    <div class="legend-bottom">
-                        <span class="legend-item"><span class="color-dot occupied"></span> Ocupado</span>
-                        <span class="legend-item"><span class="color-dot reserved"></span> Reservado</span>
-                        <span class="legend-item"><span class="color-dot available"></span> Livre</span>
-                        <span class="legend-item"><span class="color-dot maintenance"></span> Manutenção</span>
-                    </div>
-                </div>
+<!-- Controles de Mapa (Opacidade e Zoom) -->
+<div class="zoom-controls">
+    <!-- Controle de Opacidade -->
+    <div class="opacity-control" title="Opacidade da Planta">
+        <span class="opacity-icon">◐</span>
+        <input type="range" id="bgOpacityInput" min="0" max="100" value="100" class="vertical-slider">
+    </div>
+    
+    <!-- Controles de Zoom -->
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">−</button>
+    <button id="zoomReset">⊙</button>
+</div>
                 <!-- Detalhes do Estande (Layout Figma - Bottom Docked) -->
 <div class="booth-details-panel hidden" id="boothDetails">
     <div class="details-header">
