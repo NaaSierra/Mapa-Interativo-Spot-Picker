@@ -583,6 +583,9 @@ function showDetails(id) {
     document.getElementById('editX').value = Math.round(booth.x) || 0;
     document.getElementById('editY').value = Math.round(booth.y) || 0;
     document.getElementById('editRotation').value = Math.round(booth.rotation) || 0;
+    document.getElementById('editLabel').value = booth.label || '';
+    document.getElementById('editW').value = Math.round(booth.w) || 30;
+    document.getElementById('editH').value = Math.round(booth.h) || 30;
 
     // Regras de Permissão
     const isManagerOrAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER';
@@ -678,22 +681,45 @@ function setupEvents() {
             }
         }
     });
-    // Ação do novo botão de Adicionar Forma
+// Ação do novo botão de Adicionar Forma
     const btnDrawForm = document.getElementById('btnDrawForm');
     if (btnDrawForm) {
+        // Substitua o listener antigo por este:
         btnDrawForm.addEventListener('click', () => {
-            const resposta = prompt("O que você deseja desenhar?\nDigite 1 para ESTANDE\nDigite 2 para ÁREA");
+            const resposta = prompt("O que você deseja adicionar?\nDigite 1 para ESTANDE\nDigite 2 para ÁREA");
             
-            if (resposta === '1' || resposta === '2') {
-                isBgEditMode = true; // Ativa a edição da planta
-                currentDrawMode = resposta === '1' ? 'booth' : 'area'; // Define o que vai ser desenhado
+            // Calcula o centro da tela baseado no pan/zoom atual
+            const startX = Math.round(150 - (transform.x / transform.scale));
+            const startY = Math.round(150 - (transform.y / transform.scale));
+
+            if (resposta === '1') {
+                const newId = 'b_' + Date.now();
+                currentEvent.booths.push({
+                    id: newId,
+                    label: 'NOVO',
+                    x: startX, y: startY, w: 30, h: 30, // Quadrado padrão de 30x30
+                    status: 'available', rotation: 0, area: 'all'
+                });
                 
-                // Limpa a tela e mostra o banner de edição
-                document.getElementById('bgEditModeBanner').classList.remove('hidden'); 
-                selectedBoothId = null;
-                document.getElementById('boothDetails').classList.add('hidden');
-                
+                saveEventToFirebase(currentEvent);
                 renderMap();
+                renderList();
+                
+                // Mágica: Seleciona o estande recém-criado para abrir o painel automaticamente!
+                selectBooth(newId); 
+                
+            } else if (resposta === '2') {
+                const newAreaId = 'area_' + Date.now();
+                currentEvent.areas.push({
+                    id: newAreaId,
+                    name: 'NOVA ÁREA',
+                    x: startX, y: startY, w: 100, h: 100, // Área padrão 100x100
+                    accent: '#d08010', dim: '#444'
+                });
+                saveEventToFirebase(currentEvent);
+                renderAreas();
+                renderMap();
+                alert("Área criada! (O painel exclusivo de Áreas será implementado na próxima etapa).");
             }
         });
     }
@@ -1164,7 +1190,7 @@ function updateUIPermissions() {
 }
 
 // Lógica do Auto-Save para todos os inputs de edição
-const inputsToAutoSave = ['editExhibitor', 'editStatus', 'editExecutive', 'editX', 'editY', 'editRotation'];
+const inputsToAutoSave = ['editExhibitor', 'editStatus', 'editExecutive', 'editX', 'editY', 'editRotation', 'editW', 'editH', 'editLabel'];
 
 inputsToAutoSave.forEach(id => {
     const el = document.getElementById(id);
@@ -1183,6 +1209,12 @@ inputsToAutoSave.forEach(id => {
             if(id === 'editX') booth.x = parseFloat(e.target.value) || booth.x;
             if(id === 'editY') booth.y = parseFloat(e.target.value) || booth.y;
             if(id === 'editRotation') booth.rotation = parseFloat(e.target.value) || 0;
+            if(id === 'editW') booth.w = parseFloat(e.target.value) || booth.w;
+            if(id === 'editH') booth.h = parseFloat(e.target.value) || booth.h;
+            if(id === 'editLabel') {
+                booth.label = e.target.value;
+                document.getElementById('detailLabel').innerText = booth.label; // Atualiza o título grande ao vivo
+            }
 
             // Log de histórico se mudar o status
             if(id === 'editStatus' && oldStatus !== booth.status) {
