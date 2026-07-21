@@ -616,9 +616,9 @@ function setupEvents() {
         isBgEditMode = false;
         document.getElementById('bgEditModeBanner').classList.add('hidden');
         renderMap();
-    });
+        });
 
-document.querySelectorAll('.sidebar .filter-btn').forEach(btn => {
+        document.querySelectorAll('.sidebar .filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.sidebar .filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
@@ -678,6 +678,26 @@ document.querySelectorAll('.sidebar .filter-btn').forEach(btn => {
             }
         }
     });
+    // Ação do novo botão de Adicionar Forma
+    const btnDrawForm = document.getElementById('btnDrawForm');
+    if (btnDrawForm) {
+        btnDrawForm.addEventListener('click', () => {
+            const resposta = prompt("O que você deseja desenhar?\nDigite 1 para ESTANDE\nDigite 2 para ÁREA");
+            
+            if (resposta === '1' || resposta === '2') {
+                isBgEditMode = true; // Ativa a edição da planta
+                currentDrawMode = resposta === '1' ? 'booth' : 'area'; // Define o que vai ser desenhado
+                
+                // Limpa a tela e mostra o banner de edição
+                document.getElementById('bgEditModeBanner').classList.remove('hidden'); 
+                selectedBoothId = null;
+                document.getElementById('boothDetails').classList.add('hidden');
+                
+                renderMap();
+            }
+        });
+    }
+
     const btnDrawBooth = document.getElementById('btnDrawBooth');
     if(btnDrawBooth) btnDrawBooth.addEventListener('click', () => { currentDrawMode = 'booth'; alert('Modo Desenho: Clique e arraste no mapa para criar um ESTANDE.'); });
     

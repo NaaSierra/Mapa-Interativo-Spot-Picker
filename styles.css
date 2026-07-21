@@ -1105,3 +1105,7 @@ svg {
     height: 70px;
     cursor: pointer;
 }
+/* Corrige o espaçamento dos botões no cabeçalho direito */
+.unified-map-header .header-right .action-btn {
+    margin-left: 0;
+}
