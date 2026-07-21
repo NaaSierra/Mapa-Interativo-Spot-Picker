@@ -681,53 +681,23 @@ function setupEvents() {
             }
         }
     });
-    // Ação do novo botão de Adicionar Forma
+    // Ação do novo botão de Adicionar Forma (Com Banner)
     const btnDrawForm = document.getElementById('btnDrawForm');
     if (btnDrawForm) {
-        // Substitua o listener antigo por este:
         btnDrawForm.addEventListener('click', () => {
-            // Ação do novo botão de Adicionar Forma (Sem Popup)
-            const btnDrawForm = document.getElementById('btnDrawForm');
-            if (btnDrawForm) {
-             btnDrawForm.addEventListener('click', () => {
             currentDrawMode = 'booth_click'; // Ativa o modo de espera do clique
             document.getElementById('mapContainer').style.cursor = 'crosshair'; // Muda o ponteiro do mouse
-              });
-             }
-            
-            // Calcula o centro da tela baseado no pan/zoom atual
-            const startX = Math.round(150 - (transform.x / transform.scale));
-            const startY = Math.round(150 - (transform.y / transform.scale));
+            document.getElementById('drawFormBanner').classList.remove('hidden'); // MOSTRA O AVISO
+        });
+    }
 
-            if (resposta === '1') {
-                const newId = 'b_' + Date.now();
-                currentEvent.booths.push({
-                    id: newId,
-                    label: 'NOVO',
-                    x: startX, y: startY, w: 30, h: 30, // Quadrado padrão de 30x30
-                    status: 'available', rotation: 0, area: 'all'
-                });
-                
-                saveEventToFirebase(currentEvent);
-                renderMap();
-                renderList();
-                
-                // Mágica: Seleciona o estande recém-criado para abrir o painel automaticamente!
-                selectBooth(newId); 
-                
-            } else if (resposta === '2') {
-                const newAreaId = 'area_' + Date.now();
-                currentEvent.areas.push({
-                    id: newAreaId,
-                    name: 'NOVA ÁREA',
-                    x: startX, y: startY, w: 100, h: 100, // Área padrão 100x100
-                    accent: '#d08010', dim: '#444'
-                });
-                saveEventToFirebase(currentEvent);
-                renderAreas();
-                renderMap();
-                alert("Área criada! (O painel exclusivo de Áreas será implementado na próxima etapa).");
-            }
+    // Ação para Cancelar a adição da forma
+    const btnCancelDraw = document.getElementById('btnCancelDraw');
+    if (btnCancelDraw) {
+        btnCancelDraw.addEventListener('click', () => {
+            currentDrawMode = null; // Cancela o modo
+            document.getElementById('mapContainer').style.cursor = 'grab'; // Volta o cursor ao normal
+            document.getElementById('drawFormBanner').classList.add('hidden'); // ESCONDE O AVISO
         });
     }
 
@@ -982,9 +952,10 @@ function setupDragAndDrop() {
             renderMap();
             renderList();
             
-            // Desativa o modo de adição e reseta o cursor
+            // Desativa o modo de adição, reseta o cursor e esconde o banner
             currentDrawMode = null;
             document.getElementById('mapContainer').style.cursor = 'grab';
+            document.getElementById('drawFormBanner').classList.add('hidden');
             
             // Abre o painel de detalhes no estande recém-criado
             selectBooth(newId);
