@@ -681,12 +681,19 @@ function setupEvents() {
             }
         }
     });
-// Ação do novo botão de Adicionar Forma
+    // Ação do novo botão de Adicionar Forma
     const btnDrawForm = document.getElementById('btnDrawForm');
     if (btnDrawForm) {
         // Substitua o listener antigo por este:
         btnDrawForm.addEventListener('click', () => {
-            const resposta = prompt("O que você deseja adicionar?\nDigite 1 para ESTANDE\nDigite 2 para ÁREA");
+            // Ação do novo botão de Adicionar Forma (Sem Popup)
+            const btnDrawForm = document.getElementById('btnDrawForm');
+            if (btnDrawForm) {
+             btnDrawForm.addEventListener('click', () => {
+            currentDrawMode = 'booth_click'; // Ativa o modo de espera do clique
+            document.getElementById('mapContainer').style.cursor = 'crosshair'; // Muda o ponteiro do mouse
+              });
+             }
             
             // Calcula o centro da tela baseado no pan/zoom atual
             const startX = Math.round(150 - (transform.x / transform.scale));
@@ -952,7 +959,42 @@ function setupDragAndDrop() {
     svg.addEventListener('mousedown', (e) => {
         if (currentUser.role === 'USER') return;
 
-        // Se estiver no modo de desenho de uma nova forma
+        svg.addEventListener('mousedown', (e) => {
+        if (currentUser.role === 'USER') return;
+
+        // --- NOVO: Captura o clique exato para injetar a forma ---
+        if (currentDrawMode === 'booth_click') {
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+            
+            // Calcula a posição do mouse considerando o zoom/pan
+            const startX = Math.round((svgP.x - transform.x) / transform.scale);
+            const startY = Math.round((svgP.y - transform.y) / transform.scale);
+
+            const newId = 'b_' + Date.now();
+            currentEvent.booths.push({
+                id: newId,
+                label: 'NOVO',
+                x: startX, y: startY, w: 30, h: 30,
+                status: 'available', rotation: 0, area: 'all'
+            });
+            
+            saveEventToFirebase(currentEvent);
+            renderMap();
+            renderList();
+            
+            // Desativa o modo de adição e reseta o cursor
+            currentDrawMode = null;
+            document.getElementById('mapContainer').style.cursor = 'grab';
+            
+            // Abre o painel de detalhes no estande recém-criado
+            selectBooth(newId);
+            return; // Impede que o restante do código tente arrastar a forma
+        }
+
+        // Se estiver no modo de desenho de uma nova forma...
         if (isBgEditMode && currentDrawMode) {
             const pt = svg.createSVGPoint();
             pt.x = e.clientX;
