@@ -1,6 +1,7 @@
 // Inicialização do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDVLx65ITELcKaavvQYyKO30I_waRTddb0",
@@ -18,6 +19,8 @@ const db = getFirestore(app);
 
 // Torna o db global para podermos acessar em outras partes do código
 window.db = db;
+const auth = getAuth(app);
+window.auth = auth;
 // Dados Globais do Sistema e Configuração
 const USER_DB = {
     'admin@spotpicker.com': { role: 'ADMIN', name: 'Admin Supremo' },
@@ -51,6 +54,9 @@ let currentSearch = '';
 let selectedBoothId = null;
 let transform = { x: 0, y: 0, scale: 1 };
 let isBgEditMode = false;
+let currentDrawMode = null; // 'booth' | 'area'
+let tempDrawStart = null;
+let tempDrawRect = null;
 
 const mapViewport = document.querySelector('.map-viewport');
 
@@ -110,33 +116,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.innerText = "Conectando...";
-        loginBtn.addEventListener('click', simulateLogin);
+        loginBtn.addEventListener('click', startGoogleLogin);
     }
-    
-    document.getElementById('btnTryAgain').addEventListener('click', () => {
-        document.getElementById('deniedScreen').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            let authorizedList = [];
+            try {
+                const response = await fetch('emails_autorizados.txt');
+                if (!response.ok) throw new Error('File not found');
+                const text = await response.text();
+                authorizedList = text.split('\n').map(e => e.trim().toLowerCase());
+            } catch (e) {
+                console.warn('Usando lista de fallback.');
+                authorizedList = Object.keys(USER_DB);
+            }
+            checkAccess(user.email.toLowerCase(), authorizedList);
+        }
     });
 
     loadEventsFromFirebase();
 });
 
-async function simulateLogin() {
-    const email = prompt('Simulação: Digite seu e-mail do Google para testar o login:', 'teste@gmail.com');
-    if (!email) return;
-
-    let authorizedList = [];
+async function startGoogleLogin() {
+    const provider = new GoogleAuthProvider();
     try {
-        const response = await fetch('emails_autorizados.txt');
-        if (!response.ok) throw new Error('File not found');
-        const text = await response.text();
-        authorizedList = text.split('\n').map(e => e.trim().toLowerCase());
-    } catch (e) {
-        console.warn('Usando lista de fallback.');
-        authorizedList = Object.keys(USER_DB);
+        await signInWithPopup(auth, provider);
+    } catch(err) {
+        console.error("Erro no login:", err);
+        alert('Falha ao autenticar com Google.');
     }
-    
-    checkAccess(email.trim().toLowerCase(), authorizedList);
 }
 
 function checkAccess(email, authorizedList) {
@@ -217,18 +225,17 @@ function applyEventThemeAndFont() {
 function renderTopBar() {
     let dropdownHtml = '<div class="event-dropdown-menu">';
     
-    let availableEvents = EVENTS_DB;
+let availableEvents = EVENTS_DB;
     if (currentUser.role !== 'ADMIN') {
-        availableEvents = EVENTS_DB.filter(e => currentUser.events.includes(e.id));
-    }
+        // Usuários comuns veem apenas os permitidos e que estão visíveis
+        availableEvents = EVENTS_DB.filter(e => currentUser.events.includes(e.id) && e.visible !== false);
+    } 
+    // ADMIN vê a lista inteira de eventos (sem filtro de visibilidade na barra)
 
     availableEvents.forEach(evt => {
         dropdownHtml += `<div class="event-option" onclick="switchEvent('${evt.id}')">${evt.name}</div>`;
     });
 
-    if (currentUser.role === 'ADMIN') {
-        dropdownHtml += `<div class="event-option new-event" onclick="createNewEvent()">+ Novo Evento</div>`;
-    }
     dropdownHtml += '</div>';
 
     const selector = document.getElementById('eventSelectorDropdown');
@@ -632,6 +639,19 @@ function setupEvents() {
             }
         }
     });
+    const btnDrawBooth = document.getElementById('btnDrawBooth');
+    if(btnDrawBooth) btnDrawBooth.addEventListener('click', () => { currentDrawMode = 'booth'; alert('Modo Desenho: Clique e arraste no mapa para criar um ESTANDE.'); });
+    
+    const btnDrawArea = document.getElementById('btnDrawArea');
+    if(btnDrawArea) btnDrawArea.addEventListener('click', () => { currentDrawMode = 'area'; alert('Modo Desenho: Clique e arraste no mapa para criar uma ÁREA.'); });
+    
+    // Garantir que ao sair da edição, o modo desenho é desativado
+    document.getElementById('btnExitBgEdit').addEventListener('click', () => {
+        isBgEditMode = false;
+        currentDrawMode = null; // Desativa o desenho
+        document.getElementById('bgEditModeBanner').classList.add('hidden');
+        renderMap();
+    });
 }
 
 function openConfigModal() {
@@ -646,6 +666,26 @@ function openConfigModal() {
     const adminOp = !isAdmin ? 'opacity: 0.5;' : '';
 
     let html = ``;
+
+    if (isAdmin) {
+        html += `
+            <div class="config-section" style="margin-bottom: 25px;">
+                <h3 style="margin-bottom: 12px; color:var(--accent);">Administração de Eventos</h3>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${EVENTS_DB.map(evt => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--surface2); border-radius:4px; border:1px solid var(--border);">
+                            <span style="font-weight:600;">${evt.name}</span>
+                            <div style="display:flex; gap:8px;">
+                                <button class="action-btn secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleEventVisibility('${evt.id}')">${evt.visible !== false ? 'Ocultar' : 'Exibir'}</button>
+                                <button class="action-btn change-status" style="font-size:11px; padding:4px 8px; background:var(--occupied); color:#fff; border-color:var(--occupied);" onclick="deleteEvent('${evt.id}')">Excluir</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <button class="action-btn new-event" style="margin-top:8px;" onclick="createNewEvent()">+ Criar Novo Evento</button>
+                </div>
+            </div>
+        `;
+    }
 
     if (isManager) {
         html += `
@@ -827,11 +867,21 @@ function setupDragAndDrop() {
     svg.addEventListener('mousedown', (e) => {
         if (currentUser.role === 'USER') return;
 
-        if (isBgEditMode) {
-            isDraggingBg = true;
-            bgStartPt = { x: e.clientX, y: e.clientY };
+        // Se estiver no modo de desenho de uma nova forma
+        if (isBgEditMode && currentDrawMode) {
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+            
+            tempDrawStart = { 
+                x: (svgP.x - transform.x) / transform.scale, 
+                y: (svgP.y - transform.y) / transform.scale 
+            };
             return;
         }
+        
+        // ... (Mantenha o resto do mousedown original de arrastar imagem ou estandes)
 
         const target = e.target.closest('.svg-booth');
         if (target && !isBgEditMode) {
@@ -878,7 +928,8 @@ function setupDragAndDrop() {
         }
     });
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', (e) => {
+        // --- 1. CÓDIGO EXISTENTE QUE SOLTA O ESTANDE/FUNDO ---
         let changed = false;
         if (draggedBooth) {
             setTimeout(() => { window.isDraggingBooth = false; }, 50);
@@ -891,6 +942,51 @@ function setupDragAndDrop() {
         }
         if (changed && currentEvent) {
             saveEventToFirebase(currentEvent);
+        }
+
+        // --- 2. NOVO CÓDIGO QUE FINALIZA O DESENHO ---
+        if (isBgEditMode && currentDrawMode && tempDrawStart) {
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            const svgP = pt.matrixTransform(document.getElementById('mapSvg').getScreenCTM().inverse());
+            
+            const endX = (svgP.x - transform.x) / transform.scale;
+            const endY = (svgP.y - transform.y) / transform.scale;
+            
+            const width = Math.abs(endX - tempDrawStart.x);
+            const height = Math.abs(endY - tempDrawStart.y);
+            
+            if (width > 5 && height > 5) {
+                const startX = Math.min(tempDrawStart.x, endX);
+                const startY = Math.min(tempDrawStart.y, endY);
+                
+                const label = prompt(`Nome/ID para o(a) novo(a) ${currentDrawMode === 'booth' ? 'Estande' : 'Área'}:`);
+                
+                if (label) {
+                    if (currentDrawMode === 'booth') {
+                        currentEvent.booths.push({
+                            id: 'b_' + Date.now(),
+                            label: label.toUpperCase(),
+                            x: startX, y: startY, w: width, h: height,
+                            status: 'available', rotation: 0, area: 'all'
+                        });
+                    } else {
+                        currentEvent.areas.push({
+                            id: 'area_' + Date.now(),
+                            name: label,
+                            x: startX, y: startY, w: width, h: height,
+                            accent: '#d08010', dim: '#444'
+                        });
+                    }
+                    saveEventToFirebase(currentEvent);
+                    renderAreas();
+                    renderMap();
+                    renderList();
+                }
+            }
+            tempDrawStart = null;
+            currentDrawMode = null;
         }
     });
 
@@ -1054,3 +1150,31 @@ if (btnEditBgMap) btnEditBgMap.addEventListener('click', enableBgEditMode);
 
 const btnEditAreas = document.getElementById('btnEditAreas');
 if (btnEditAreas) btnEditAreas.addEventListener('click', manageAreas);
+
+// --- GERENCIAMENTO DE EVENTOS (ADMIN) ---
+window.toggleEventVisibility = async function(id) {
+    if (currentUser.role !== 'ADMIN') return;
+    const evt = EVENTS_DB.find(e => e.id === id);
+    if (evt) {
+        evt.visible = evt.visible === false ? true : false;
+        await saveEventToFirebase(evt);
+        renderTopBar();
+        openConfigModal(); // Recarrega o modal para atualizar o botão
+    }
+}
+
+window.deleteEvent = async function(id) {
+    if (currentUser.role !== 'ADMIN') return;
+    const confirmDelete = confirm("ATENÇÃO: Tem certeza que deseja excluir permanentemente este evento e todos os seus dados?");
+    if (confirmDelete) {
+        try {
+            await deleteDoc(doc(window.db, "events", id));
+            alert("Evento excluído com sucesso.");
+            // Recarrega a página para atualizar o estado do Firebase
+            window.location.reload(); 
+        } catch (err) {
+            console.error("Erro ao excluir evento:", err);
+            alert("Falha ao excluir. Verifique suas permissões no Firestore.");
+        }
+    }
+}
