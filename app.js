@@ -956,10 +956,7 @@ function setupDragAndDrop() {
 
     const svg = document.getElementById('mapSvg');
 
-    svg.addEventListener('mousedown', (e) => {
-        if (currentUser.role === 'USER') return;
-
-        svg.addEventListener('mousedown', (e) => {
+   svg.addEventListener('mousedown', (e) => {
         if (currentUser.role === 'USER') return;
 
         // --- NOVO: Captura o clique exato para injetar a forma ---
@@ -994,7 +991,7 @@ function setupDragAndDrop() {
             return; // Impede que o restante do código tente arrastar a forma
         }
 
-        // Se estiver no modo de desenho de uma nova forma...
+        // Se estiver no modo de desenho de uma nova forma (arrastando)
         if (isBgEditMode && currentDrawMode) {
             const pt = svg.createSVGPoint();
             pt.x = e.clientX;
@@ -1008,8 +1005,7 @@ function setupDragAndDrop() {
             return;
         }
         
-        // ... (Mantenha o resto do mousedown original de arrastar imagem ou estandes)
-
+        // Clicar e selecionar/arrastar um estande existente
         const target = e.target.closest('.svg-booth');
         if (target && !isBgEditMode) {
             e.stopPropagation();
